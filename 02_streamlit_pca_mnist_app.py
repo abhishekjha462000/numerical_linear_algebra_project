@@ -27,10 +27,10 @@ st.caption(
 # --------------------------------------------------------------------
 @st.cache_data(show_spinner="Loading MNIST and computing SVD...")
 def load_and_decompose(n_samples=10000, seed=0):
-    from sklearn.datasets import fetch_openml
-    mnist = fetch_openml("mnist_784", version=1, as_frame=False, parser="auto")
-    X_full = mnist.data.astype(float)
-    y_full = mnist.target.astype(int)
+    from tensorflow.keras.datasets import mnist
+    (X_train, y_train), (X_test, y_test) = mnist.load_data()
+    X_full = np.concatenate([X_train, X_test]).reshape(-1, 784).astype(float)
+    y_full = np.concatenate([y_train, y_test]).astype(int)
 
     rng = np.random.default_rng(seed)
     idx = rng.choice(len(X_full), size=n_samples, replace=False)
