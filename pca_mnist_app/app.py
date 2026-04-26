@@ -27,10 +27,26 @@ st.caption(
 # --------------------------------------------------------------------
 @st.cache_data(show_spinner="Loading MNIST and computing SVD...")
 def load_and_decompose(n_samples=10000, seed=0):
-    from tensorflow.keras.datasets import mnist
-    (X_train, y_train), (X_test, y_test) = mnist.load_data()
-    X_full = np.concatenate([X_train, X_test]).reshape(-1, 784).astype(float)
-    y_full = np.concatenate([y_train, y_test]).astype(int)
+    import gzip
+    import os
+    import urllib.request
+
+    BASE = "https://storage.googleapis.com/cvdf-datasets/mnist/"
+    files = {
+        "X": "train-images-idx3-ubyte.gz",
+        "y": "train-labels-idx1-ubyte.gz",
+    }
+    cache_dir = "/tmp/mnist"
+    os.makedirs(cache_dir, exist_ok=True)
+    for fname in files.values():
+        path = os.path.join(cache_dir, fname)
+        if not os.path.exists(path):
+            urllib.request.urlretrieve(BASE + fname, path)
+
+    with gzip.open(os.path.join(cache_dir, files["X"]), "rb") as f:
+        X_full = np.frombuffer(f.read(), np.uint8, offset=16).reshape(-1, 784).astype(float)
+    with gzip.open(os.path.join(cache_dir, files["y"]), "rb") as f:
+        y_full = np.frombuffer(f.read(), np.uint8, offset=8).astype(int)
 
     rng = np.random.default_rng(seed)
     idx = rng.choice(len(X_full), size=n_samples, replace=False)
