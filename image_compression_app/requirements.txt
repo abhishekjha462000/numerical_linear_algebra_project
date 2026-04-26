@@ -3,5 +3,3 @@ numpy
 matplotlib
 scikit-image
 pillow
-tensorflow
-scikit-learn
